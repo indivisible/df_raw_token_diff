@@ -22,11 +22,14 @@ DEFAULT_SAFE_TOKENS = {
     }
 
 token_re = re.compile(r'\[([^\]]*)\]')
+
+
 def get_tokens(stream):
     for line in stream:
         for match in token_re.finditer(line):
             raw_token = match.group(1)
             yield tuple(raw_token.split(':'))
+
 
 def diff_token_streams_old(stream_a, stream_b):
     for (a, b) in zip_longest(stream_a, stream_b):
@@ -39,7 +42,8 @@ def diff_token_streams_old(stream_a, stream_b):
                     values.append(str(x))
                 else:
                     values.append('**{}** => **{}**'.format(x, y))
-            print ('[{}]'.format(':'.join(values)))
+            print('[{}]'.format(':'.join(values)))
+
 
 def token_diff(a, b):
     values = []
@@ -49,6 +53,7 @@ def token_diff(a, b):
         else:
             values.append('**{}** => **{}**'.format(x, y))
     return '[{}]'.format(':'.join(values))
+
 
 def diff_token_streams(stream_a, stream_b, safe_tokens=DEFAULT_SAFE_TOKENS):
     list_a = list(stream_a)
@@ -83,12 +88,14 @@ def diff_token_streams(stream_a, stream_b, safe_tokens=DEFAULT_SAFE_TOKENS):
                 raise ValueError('Unkown diff op: {} {} {} {} {}'.format(op, i1, i2, j1, j2))
     return lines
 
+
 def diff_files(a, b):
     with open(a, encoding='cp437') as stream_a, open(b, encoding='cp437') as stream_b:
         lines = diff_token_streams(get_tokens(stream_a), get_tokens(stream_b))
         if lines:
             print('Comparing {} <=> {}'.format(a, b))
             print('\n'.join(lines))
+
 
 def diff_dirs(a, b):
     for child in a.iterdir():
@@ -97,6 +104,7 @@ def diff_dirs(a, b):
             diff_files(child, other)
         elif child.is_dir() and other.is_dir():
             diff_dirs(child, other)
+
 
 def diff_paths(a, b):
     a = Path(a)
@@ -109,7 +117,7 @@ def diff_paths(a, b):
     else:
         return diff_dirs(a, b)
 
+
 if __name__ == '__main__':
     import sys
     diff_paths(sys.argv[1], sys.argv[2])
-
